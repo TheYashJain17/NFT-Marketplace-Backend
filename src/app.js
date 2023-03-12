@@ -4,7 +4,7 @@ require('dotenv').config();
 
 const morgan = require('morgan');
 
-const nftModel = require('./ModelsAndSchemas/nftModel');
+const nftRouter = require('../src/Routes/nftsRoutes');
 
 const app = express();
 
@@ -12,7 +12,7 @@ app.use(express.json());
 
 app.use(morgan('dev'));
 
-app.use(nftModel);
+app.use(nftRouter);
 
 const port = process.env.PORT;
 
