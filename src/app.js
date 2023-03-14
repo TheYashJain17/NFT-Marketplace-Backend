@@ -4,6 +4,8 @@ require('dotenv').config();
 
 const morgan = require('morgan');
 
+require('../ConnectionFile/connectionWithMongo');
+
 const nftRouter = require('../src/Routes/nftsRoutes');
 
 const app = express();
