@@ -4,9 +4,20 @@ we are exporting all the functions separately using (exports.) and after that th
 exporting seaprately so that we can use all the functions seaprately.*/
 //IMPORTANT NOTE- Kindly use dollar sign($) where we have used it otherwise we will get an Error.
 
-const NFT = require('../src/ModelsAndSchemas/nftModel'); //requiring our model to use it
+                                    //IMPORTANT NOTE
+
+/*In this file we have commented out all the try catch block and instead of that we have made handleasync
+and used it in place of try catch block as our handleasync function is handling our error.
+we have covered all the code in handleaync function just as simple as this and after this we dont have to use
+try catch and dont have to provide and code for error , our handleasync will handle all errors.*/
+
+const NFT = require('../src/ModelsAndSchema/nftModel'); //requiring our model to use it
 
 const APIFeatures = require('../utils/apiFeatures'); //requiring the class which we made inside separate file
+
+const handleAsync = require("../utils/handleAsync");
+
+const errorHandling = require('../utils/errorHandling');
 
                                 //TOP 3 NFTS API
 
@@ -30,44 +41,24 @@ exports.aliasTopNFTs = (req , res , next) => { //this will gonna act like a midd
 
     //(Making the GET API with the router so that we can export the apis in another file)
 
-exports.getAllNfts = (async(req , res) => {
+exports.getAllNfts = handleAsync(async(req , res , next) => {
 
-    try {
+    const features = new APIFeatures(NFT.find() , req.query).filter().sort().limitFields().pagination(); //using all the functions which we created inside class and especially on GET API so the user can get the NFTs according to the filters and limits we have provided , thats the way of using a class function , if we dont want to use any class function just simply remove it.
 
+    const nfts = await features.query;
 
-        const features = new APIFeatures(NFT.find()  , req.query).filter().sort().limitFields().pagination(); //using all the functions which we created inside class and especially on GET API so the user can get the NFTs according to the filters and limits we have provided , thats the way of using a class function , if we dont want to use any class function just simply remove it.
+    res.status(200).json({ //sending response in the form of json
 
-        const nfts = await features.query;
+        status : "Success", //setting the status to success
+        totalNfts : nfts.length, //sending the total length of the nfts array as totalNfts to show the user how many nfts have been made till now.
+        data : {
 
-        res.status(200).json({ //sending response in the form of json
+            allNfts : nfts //In data, we are sending all the nfts which we found and stored inside nfts variable.
+
+        }})
     
-            status : "Success", //setting the status to success
-            totalNfts : nfts.length, //sending the total length of the nfts array as totalNfts to show the user how many nfts have been made till now.
-            data : {
-    
-                allNfts : nfts //In data, we are sending all the nfts which we found and stored inside nfts variable.
-    
-            }
-    
-        })
+    console.log("All NFTs has been found successfully"); //Consolling The Success Statement in our console.
 
-        console.log("All NFTs has been found successfully"); //Consolling The Success Statement in our console.
-    
-        // console.log(req.query , queryObj);
-
-        
-    } catch (error) { //If there is an error we will catch it inside  in this function.
-
-        res.status(404).json({ //sending resposne in json
-
-            status : "Failed", //setting the status to failed
-            message : "Some Error Occurred" //sending the messsage as some error occurred.
-
-        })
-
-        console.log(`The Error is ${error}`); //consolling the Error we caught.
-        
-    }
 
 })
 
@@ -77,84 +68,52 @@ exports.getAllNfts = (async(req , res) => {
                     //making the GET API to get the single NFT
 
 // router.get('/api/v1/nfts/:id/:id2/:id3?' , async(req , res) => { // This is for the purpose when we want to have multiple ids.Question mark means it is optional to proivde id otherwise it is mandatory to provide id else we will get an error.
-exports.getSingleNft = (async(req , res) => {
+exports.getSingleNft = handleAsync(async(req , res , next) => {
 
-    try {
-        
-        const _id = req.params.id; //getting the id which the user has entered as we have made the route in that way in which the user can enter a id. We are getting the id with the  help of req.params.id and storing it inside _id variable because in mongo db the id is always get stored inside _id therefore always remember to use _id while getting the id from the user.
+    const _id = req.params.id; //getting the id which the user has entered as we have made the route in that way in which the user can enter a id. We are getting the id with the  help of req.params.id and storing it inside _id variable because in mongo db the id is always get stored inside _id therefore always remember to use _id while getting the id from the user.
 
-        const singleNft = await NFT.findById(_id); //with the help of our model and .findById , we are entering the id which the user entered and on the basis of that id we are searching for that particular NFT.
+    const singleNft = await NFT.findById(_id); //with the help of our model and .findById , we are entering the id which the user entered and on the basis of that id we are searching for that particular NFT.
 
-        res.status(200).json({ //sending resposne in json form.
-
-            status : "Success", //sending the status to success
-            nftFound : 1 , //for now we are hard quotting the value 1 because with one id user can find only one NFT.
-            data : {
-
-                yourRequestedNFT : singleNft //In data , we are sending in the requested NFt the NFT which the user requested for as we have stored it inside singleNft Variable.
-
-            }
-
-        })
-
-        console.log(`NFT of id ${_id} has been found successfuly`); //consolling the id which the user is entering.
-
-    } catch (error) { //If there is an error we will catch it inside  in this function.
-
-        res.status(404).json({ //sending response in form of json.
-
-            status : "Failed", //setting the status to failed.
-            Message : "Some Error Occurred" //sending the message some error occurred.
-
-        })
-    
-        console.log(`The Error Is ${error}`); //consolling the error.
+    if(!singleNft){
+        return next(new errorHandling(`No NFT Has Been Found With Id ${_id}` , 404));
     }
 
+    res.status(200).json({ //sending resposne in json form.
+
+        status : "Success", //sending the status to success
+        nftFound : 1 , //for now we are hard quotting the value 1 because with one id user can find only one NFT.
+        data : {
+
+            yourRequestedNFT : singleNft //In data , we are sending in the requested NFt the NFT which the user requested for as we have stored it inside singleNft Variable.
+
+        }})
+    
+        console.log(`NFT of id ${_id} has been found successfully`); //consolling the id which the user is entering.
+
+
 })
+
 
                                 //POST API
 
 //With this API the NFT which the user will create will gonna be saved inside database.
 
 
-exports.makeNewNft = (async(req , res) => {
-
-    // const newId = nfts[nfts.length - 1].id + 1; //This is for the purpose when we are saving data in our local database and we want to make our custom id , in that matter this code came into ligh.
-
-    try {
+exports.makeNewNft = handleAsync((async(req , res , next) => {
 
     const newNFT = await NFT.create(req.body); //using our model(NFT) and .create method to create the data and we are going to take the user data therefore we are using req.body to get all the data from the user and entering it inside .create so that data will gonne be entered into the database which the user is entering.
 
-        res.status(201).json({ //sending the response in json format.
+    res.status(201).json({ //sending the response in json format.
 
-            status : "Success", //setting the status to Success
-            data : {
+        status : "Success", //setting the status to Success
+        data : {
 
-                nft : newNFT //And in form of data we are sending the nft which the user has created by himself/herself.
-
-            }
-
-        })
-
-        console.log("Your NFT Has Been Created Successfully"); //consolling the success statement.
-        
-    } catch (error) { //catching the error if there is any.
-
-        res.status(404).json({ //sending the response in json format.
-
-            status : "Failed", //setting the status to failed
-            messsage : "You must send the valid data for the NFT" //and in form of message we are sending the custom error.
-
-        })
-
-        console.log(`The Error is ${error}`); //consolling the error if we are getting any error.
-        
-    }
-
+            nft : newNFT //And in form of data we are sending the nft which the user has created by himself/herself.
+        }})
     
+        console.log("Your NFT Has Been Created Successfully"); //consolling the success statement.
 
-})
+}));
 
 
                                     //Patch API
@@ -163,48 +122,32 @@ exports.makeNewNft = (async(req , res) => {
 
 
 
-exports.updateNft = (async(req , res) => {
+exports.updateNft = handleAsync(async(req , res , next) => {
 
-// if(req.params.id * 1 > nfts.length){ //We are checking if the id we are getting from the request is greater than the length of the total nfts we have then if it is greater then it is invalid id , Else the id is okay and send the  response.
+    const _id = req.params.id; //getting the id which the user is entering , we want that id because then only we would be able to know what is that particular data what the user wants to update.
 
+    const updatedNFT = await NFT.findByIdAndUpdate(_id , req.body , { //using our model(NFT) and .findByIdAndUpdate to update the data we are entering the id that means providing the id of the data we want to update and then providing req.body this will give us the data which the user is entering so that we will get the updated data and that will be replaced by the data which is already there in that particular data.
 
-    try {
+        new : true, //setting new as true so that the user can see the updated data otherwise even after updating the data user will gonna see the non updated data.
+        runValidators : true //setting runValidators to true so that the validators we defined in our schema and models can work here like no duplicate name or any other thing we defined inside models and schemas.
 
-        const _id = req.params.id; //getting the id which the user is entering , we want that id because then only we would be able to know what is that particular data what the user wants to update.
+    });
 
-        const updatedNFT = await NFT.findByIdAndUpdate(_id , req.body , { //using our model(NFT) and .findByIdAndUpdate to update the data we are entering the id that means providing the id of the data we want to update and then providing req.body this will give us the data which the user is entering so that we will get the updated data and that will be replaced by the data which is already there in that particular data.
-
-            new : true, //setting new as true so that the user can see the updated data otherwise even after updating the data user will gonna see the non updated data.
-            runValidators : true //setting runValidators to true so that the validators we defined in our schema and models can work here like no duplicate name or any other thing we defined inside models and schemas.
-
-        });
-
-        res.status(200).json({ //sending response in json format.
-
-            status : "Success", //seeting the status to success.
-            updated : "Success", //setting the updated to success , with this we are showing that the data has been updated successfully.
-            data : {
-
-                result : updatedNFT //Inside data as a result we are sending the updated data to the user. so that he/she can see that his/her data has been updated successfully.
-
-            }
-
-        })
-
-        console.log("NFT Has Been Updated Successfully");//consolling the success statement.
-        
-    } catch (error) {//catching the error if there is any.
-
-        res.status(404).json({ //sending response in form of json.
-
-            status : "Failed", //setting the status to failed.
-            Message : "Some Error Occurred" //sending custom error in message.
-
-        })
-
-        console.log(`The Error is ${error}`); //consolling the error if there is any error.
-        
+    if(!updatedNFT){
+        return next(new errorHandling(`No NFT Has Been Found With Id ${_id}` , 404));
     }
+
+    res.status(200).json({ //sending response in json format.
+
+        status : "Success", //seeting the status to success.
+        updated : "Success", //setting the updated to success , with this we are showing that the data has been updated successfully.
+        data : {
+
+            result : updatedNFT //Inside data as a result we are sending the updated data to the user. so that he/she can see that his/her data has been updated successfully.
+
+        }})
+    
+        console.log("NFT Has Been Updated Successfully");//consolling the success statement.
 
 
 })
@@ -214,14 +157,16 @@ exports.updateNft = (async(req , res) => {
         //With this API user can delete the NFT which is created by the user itself.
 
 
-exports.deleteNft = (async(req ,res) => { 
-
-  try {
+exports.deleteNft = handleAsync(async(req ,res , next) => {
 
     const _id = req.params.id; //getting the id which the user is entering with the help of req.params.id
 
     const deletedNFT = await NFT.findByIdAndDelete(_id);//using our model(NFT) and .findByIdAndDelete to delete the NFT which the user has created and with the help of the id which the user is entering we can know what NFT has to be deleted.
   
+    if(!deletedNFT){
+        return next(new errorHandling(`No NFT Has Been Found With Id ${_id}` , 404));
+    }
+
     res.status(204).json({//sending response in json format.
   
       status : "Success", //setting the status to success
@@ -230,29 +175,16 @@ exports.deleteNft = (async(req ,res) => {
     })
 
     console.log("NFT Has Been Deleted Successfully"); //consolling the success statement.
-  
-    
-  } catch (error) { //catching the error if there is any
-
-    res.status(404).json({ //sending response in json.
-
-        status : "Failed", //setting status to failed.
-        message : "Some Error Occurred" //sending custom error in message.
-
-    })
-
-    console.log(`The Error is ${error}`); //consolling the Error if we are getting any error.
-    
-  }
 
 
 })
 
 
+
+
                                 //AGGREGATE PIPELINE 
                         
 // Refer Mongoose documentation for more information/Detailed information about AGGREGATE PIPELINE
-
 
 /*This becomes really helpful when we have some data and we want to do some calculation on it.
 
@@ -263,10 +195,9 @@ In these type of cases AGGREGATE PIPELINE comes into light which is provided by 
 We are making separate route for this , therefore following the same structure as we were following 
 for the rest of the routes.*/
 
+// try{
+exports.getNFTsStats = handleAsync(async(req , res) => {
 
-exports.getNFTsStats = async (req , res) => {
-
-    try {
 /*we are using our model(NFT) which we imported and using .aggregate method which is provided by the mongoose.
 (You can go to mongoose documentation to know more about this method).and inside .aggregate method
 we are defining an array and inside we have to all the syntax in the form of object like we have done here.
@@ -354,22 +285,8 @@ we have commented out ratingsAverage.*/
         }
 
     })
-        
-    }catch (error) { //catching the error if there is any
-
-        res.status(404).json({ //sending response in json.
-    
-            status : "Failed", //setting status to failed.
-            message : "Some Error Occurred" //sending custom error in message.
-    
-        })
-    
-        console.log(`The Error is ${error}`); //consolling the Error if we are getting any error.
-        
-    }
-
-
-}
+   
+})
 
 
                                 //MONTHLY PLAN API
@@ -380,10 +297,10 @@ we have commented out ratingsAverage.*/
 For this we also gonna create a separate route therefore we are making a function and exporting it.*/
 
 
-exports.getMonthlyPlan = async (req , res) => {
+exports.getMonthlyPlan = handleAsync(async(req , res , next) => {
 
 
-    try {
+    // try {
 
         const year = req.params.year * 1; //getting the year from the user in the form of params so that we can show according to the year what NFts have been made in that month of that particular year what the user has asked for.
 
@@ -472,20 +389,7 @@ in that month will be grouped together and will be shown togetherly.*/
 
         })
         
-    } catch (error) { //catching the error if there is any
 
-        res.status(404).json({ //sending response in json.
-    
-            status : "Failed", //setting status to failed.
-            message : "Some Error Occurred" //sending custom error in message.
-    
-        })
-    
-        console.log(`The Error is ${error}`); //consolling the Error if we are getting any error.
-        
-    }
-
-
-}
+})
 
 
