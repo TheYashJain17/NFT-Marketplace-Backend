@@ -2,28 +2,9 @@ const express = require('express'); //importing  express to use it
 
 const router = express.Router(); //initialising express Router to use it.
 
-/*There are 2 ways of importing all the data of APIs from another file.
-1st is the below one in which we are requiring all the functions in a single go,what we do generally.*/
 
 const nftAPIsData = require('../../Controllers/nftAPIsAllData'); //importing all the data of our APIs which we stored in another file.
 
-/*This is the 2nd way of importing all the functions from another file.
-this is object destructuring in which we are importing all the functions separately.*/
-
-//Both methods are good we can use whatever we want to.
-
-// const {getAllNfts , makeNewNft , getSingleNft , updateNft , deleteNft} = require('../../Controllers/nftAPIsAllData');
-
-//This is the router in case when we are importing all the functions through object destructuring.
-
-// router.route('/api/v1/nfts')
-// // .get(getAllNfts)
-// // .post(makeNewNft);
-
-// router.route('/api/v1/nfts/:id')
-// // .get(getSingleNft)
-// // .patch(updateNft)
-// // .delete(deleteNft);
 
                         //TOP 3 NFTs ROUTE
 
