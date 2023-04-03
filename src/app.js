@@ -16,10 +16,14 @@ process.on("uncaughtException" , err => { //using proces.on which is the inbuilt
 
 const golbalErrorHandler = require('../Controllers/errorHandlingAllData'); //importing our globalErrorHandler.
 
+const errorHandling = require('../utils/errorHandling');
+
 
 require('../ConnectionFile/connectionWithMongo');
 
 const nftRouter = require('../src/Routes/nftsRoutes');
+
+const userRouter = require('../src/Routes/userRoutes');
 
 const app = express();
 
@@ -30,6 +34,8 @@ app.use(morgan('dev'));
 app.use(golbalErrorHandler);
 
 app.use(nftRouter);
+
+app.use(userRouter);
 
 const port = process.env.PORT;
 

@@ -10,6 +10,22 @@ module.exports = (err , req , res , next) =>  {
 
 // This the function we are using below and defining here.
 
+const handleJWTExpiredError = () => { //Inititalsing function
+
+    return new errorHandling("Your Token Got Expired  , Please Log In Again" , 401); //then we are using our class(errorHandling) which we made in another file , we are returning the error with the help of the this function and the class we made and inside our class we are sending the failed statement and also defining the statusCode which is to be send with the error.
+
+}
+
+const handleJWTError = (err) => { //Inititalsing function with the err as parameter to catch the error.
+
+    const message = `${err.name} : Invalid Token , Please Log In Again`; //We are making a message to send to the user, we are using template literal
+
+    return new errorHandling(message , 401); //then we are using our class(errorHandling) which we made in another file , we are returning the error with the help of the this function and the class we made and inside our class we are sending the message we created just above and also defining the statusCode which is to be send with the error.
+
+}
+
+// This the function we are using below and defining here.
+
     const handleCastError = (err) => { //Inititalsing function with the err as parameter to catch the error.
 
         const message = `Invalid ${err.path} : ${err.value}`; //We are making a message to send to the user, we are using template literal and then we are showing the place of the error and the value of the erorr because of which the error is occurring.
@@ -70,7 +86,8 @@ And in response we are sending multiple things.*/
     if(error.name === "CastError") error = handleCastError(error);//We are checking if the name of the error is === CastError then run handleCastError function with the error parameter and we have defined this function above.
     if(error.code === 11000) error = handleDuplicateFieldError(error);//We are checking if the code(means number like 11000) of the error is === 11000 then run handleDuplicateFieldError function with the error parameter and we have defined this function above.
     if(error.name === "ValidationError") error = handleValidationError(error);//We are checking if the name of the error is === ValidationError then run handleValidationError function with the error parameter and we have defined this function above.
- 
+    if(error.name === "JsonWebTokenError") error = handleJWTError(error); //We are checking if the name of the error is === JsonWebTokenError then run handleJWTError function with the error parameter and we have defined this function above.
+    if(error.name === "TokenExpiredError") error = handleJWTExpiredError(); //We are checking if the name of the error is === TokenExpiredError then run handleJWTExpiredError function and we have defined this function above.
 
     next(); //At the end using next parameter as a function because this is a middleware and we have to use this.
 

@@ -11,7 +11,7 @@ and used it in place of try catch block as our handleasync function is handling 
 we have covered all the code in handleaync function just as simple as this and after this we dont have to use
 try catch and dont have to provide and code for error , our handleasync will handle all errors.*/
 
-const NFT = require('../src/ModelsAndSchema/nftModel'); //requiring our model to use it
+const NFT = require('../src/ModelsAndSchemas/nftModel'); //requiring our model to use it
 
 const APIFeatures = require('../utils/apiFeatures'); //requiring the class which we made inside separate file
 

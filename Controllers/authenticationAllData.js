@@ -2,7 +2,7 @@ const {promisify} = require('util');  //Imporing inbuilt module of javscript fro
 
 const crypto = require('crypto'); //Importing crypto module.
  
-const User = require('../src/ModelsAndSchema/userModel'); //Importing our user model from another file.
+const User = require('../src/ModelsAndSchemas/userModel'); //Importing our user model from another file.
 
 const jwt = require('jsonwebtoken'); //importing jsonwebtoken which gonna helps us in generating token.
 
@@ -12,7 +12,7 @@ require('dotenv').config(); //initialising this function so that we can see the 
 
 const handleAsync = require('../utils/handleAsync'); //importing handleAsync function from another file.
 
-const sendEmail = require('../utils/email'); //Importing the file from another file we made.
+// const sendEmail = require('../utils/email'); //Importing the file from another file we made.
 
 const generatingToken = (id) => { //making a function to generate the token , making this in separate function so that we can use it in different places and we dont have to write the same code again and again.And taking id as parameter because we will gonna generate the token on the basis of id of the user.
 
@@ -47,7 +47,7 @@ expiry time of cookie in env file and we have written * 24 * 60 * 60 * 1000 to c
 milliseconds.*/
 
 
-        expires : new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
+        expires : new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN ),
 
 /*With the secure property of mongo and doing it true we are saying that send cookie only on a secured network
 it means no cookie means user cannot access our website , right now we are commenting this out because 
